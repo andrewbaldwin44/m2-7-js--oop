@@ -1,34 +1,53 @@
 class BookList {
   constructor() {
-    this.books = [];
-    this.lastRead = null;
-    this.currentlyReading = null;
+    this.currentlyReading = [];
+    this.nextUp = [];
+    this.recentlyRead = [];
+    this.library = [];
   }
 
   add(book) {
-    this.books.push(book);
-    if (!this.currentlyReading) this.currentlyReading = book;
+    if (this.currentlyReading.length === 0) {
+      this.currentlyReading.push(book);
+    }
+    else if (book.isRead) {
+      this.recentlyRead.unshift(book);
+    }
+    else {
+      this.nextUp.unshift(book);
+    }
+
+    this.library.push(book);
   }
 
   lookupBook(bookTitle) {
-    return this.books.find((book) => book.title === bookTitle);
+    return this.library.find(book => book.title === bookTitle);
   }
 
-  startReading(bookTitle) {
-    this.currentlyReading = this.lookupBook(bookTitle);
+  index(book, shelf) {
+    return shelf.findIndex(book => book === book);
   }
 
-  finishReading(bookTitle) {
-    this.lastRead = this.lookupBook(bookTitle);
-    this.lastRead.isRead = true;
-    this.currentlyReading = null;
+  startReading(book) {
+    let bookIndex = this.index(book, this.recentlyRead);
+
+    this.currentlyReading.push(book);
+    this.nextUp.splice(bookIndex, 1);
+  }
+
+  finishReading(book) {
+    let bookIndex = this.index(book, this.currentlyReading);
+
+    book.isRead = true;
+    this.currentlyReading.splice(bookIndex, 1);
+    this.recentlyRead.unshift(book);
   }
 
   getNumRead() {
-    return this.books.filter(book => book.isRead).length;
+    return this.library.filter(book => book.isRead).length;
   }
 
   getNumUnread() {
-    return this.books.filter(book => !book.isRead).length
+    return this.library.filter(book => !book.isRead).length
   }
 }
